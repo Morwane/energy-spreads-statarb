@@ -9,9 +9,9 @@ REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
 from src.data import load_prices
-from src.strategy import build_book, GAL_PER_BBL, WINDOW, ENTRY, COST
+from src.strategy import build_book, sensitivity_grid, GAL_PER_BBL, WINDOW, ENTRY, COST
 from src.metrics import vol_target, performance, subperiod_metrics
-from src.plots import make_all, SUBPERIODS
+from src.plots import make_all, plot_sensitivity, SUBPERIODS
 
 DATA, ASSETS, REPORTS = REPO / "data", REPO / "docs" / "assets", REPO / "reports"
 
@@ -20,7 +20,10 @@ def main():
     prices = load_prices(DATA)
     res = build_book(prices)
     make_all(res, ASSETS)
+    grid = sensitivity_grid(prices)
+    plot_sensitivity(grid, ASSETS)
     print(f"Figures → {ASSETS}")
+    print(f"Sensitivity grid Sharpe range: {grid.values.min():.2f} .. {grid.values.max():.2f}")
 
     m = {nm: performance(vol_target(r), pos) for nm, r, pos in
          [("Crack 3:2:1", res["r_crack"], res["pos_crack"]),
@@ -68,6 +71,11 @@ def main():
     for p, row in sp.iterrows():
         L.append(f"| {p} | {row['sharpe']:+.2f} | {row['cagr']:+.1%} | {row['max_dd']:.1%} |")
     L += ["", "![Subperiods](../docs/assets/subperiod_robustness.png)", "",
+          "### Parameter sensitivity",
+          f"Combined-book Sharpe across (window, entry) grid ranges "
+          f"**{grid.values.min():.2f} – {grid.values.max():.2f}** — a stable surface, "
+          "so the edge is not cherry-picked to one parameter set.",
+          "", "![Sensitivity](../docs/assets/parameter_sensitivity.png)", "",
           "## Risk controls",
           "- No look-ahead: z uses only past data; positions `shift(1)` before applied to returns.",
           "- Costs charged on realized turnover. Vol-targeting for interpretable risk.",

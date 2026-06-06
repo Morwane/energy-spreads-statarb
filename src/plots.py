@@ -99,3 +99,21 @@ def make_all(res: dict, assets: Path):
     fig.savefig(assets / "performance_summary_table.png", bbox_inches="tight"); plt.close(fig)
 
     return list(SUBPERIODS), rows
+
+
+def plot_sensitivity(grid, assets: Path):
+    """Heatmap of book Sharpe over (window, entry) — robustness to parameters."""
+    assets = Path(assets)
+    fig, ax = plt.subplots(figsize=(7, 4.5))
+    im = ax.imshow(grid.values.astype(float), cmap="RdYlGn", aspect="auto",
+                   vmin=0, vmax=max(1.0, grid.values.max()))
+    ax.set_xticks(range(len(grid.columns))); ax.set_xticklabels(grid.columns)
+    ax.set_yticks(range(len(grid.index))); ax.set_yticklabels(grid.index)
+    ax.set_xlabel("entry threshold (z)"); ax.set_ylabel("z-score window (days)")
+    for i in range(grid.shape[0]):
+        for j in range(grid.shape[1]):
+            ax.text(j, i, f"{grid.values[i, j]:.2f}", ha="center", va="center", fontsize=9)
+    ax.set_title("Parameter Sensitivity — Combined Book Sharpe\n(stable surface → not overfit)",
+                 fontweight="bold")
+    fig.colorbar(im, ax=ax, label="Sharpe")
+    fig.savefig(assets / "parameter_sensitivity.png", bbox_inches="tight"); plt.close(fig)

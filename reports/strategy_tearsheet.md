@@ -44,6 +44,11 @@ Rolling 60d z-score; **continuous** sizing position = clip(−z/2, −1, 1). Bre
 
 ![Subperiods](../docs/assets/subperiod_robustness.png)
 
+### Parameter sensitivity
+Combined-book Sharpe across (window, entry) grid ranges **0.72 – 0.87** — a stable surface, so the edge is not cherry-picked to one parameter set.
+
+![Sensitivity](../docs/assets/parameter_sensitivity.png)
+
 ## Risk controls
 - No look-ahead: z uses only past data; positions `shift(1)` before applied to returns.
 - Costs charged on realized turnover. Vol-targeting for interpretable risk.

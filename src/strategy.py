@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 
 from .models import kalman_hedge_ratio, ou_half_life
+from .metrics import vol_target, performance
 
 GAL_PER_BBL = 42.0
 WINDOW = 60
@@ -76,6 +77,20 @@ def build_book(prices: pd.DataFrame, **kw) -> dict:
         "hl_crack": ou_half_life(crack), "hl_bwti": ou_half_life(bwti),
         "leg_corr": float(leg_corr),
     }
+
+
+def sensitivity_grid(prices: pd.DataFrame,
+                     windows=(40, 60, 80, 100, 120),
+                     entries=(1.5, 2.0, 2.5, 3.0)) -> pd.DataFrame:
+    """Combined-book Sharpe (vol-targeted) over a grid of (window, entry).
+    A stable surface = the edge is not cherry-picked to one lucky parameter set."""
+    out = pd.DataFrame(index=list(windows), columns=list(entries), dtype=float)
+    for w in windows:
+        for e in entries:
+            res = build_book(prices, window=w, entry=e)
+            out.loc[w, e] = performance(vol_target(res["book"]))["sharpe"]
+    out.index.name = "window"; out.columns.name = "entry"
+    return out
 
 
 def quant_checks(prices: pd.DataFrame, res: dict) -> list[tuple[str, bool, str]]:

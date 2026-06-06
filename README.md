@@ -56,9 +56,12 @@ The two legs are weakly correlated (**ρ ≈ 0.07**) → the combined book genui
 - **Regime filter** — exposure cut to 30% when spread vol exceeds its trailing 90th percentile.
 - **Vol targeting** — book scaled to 10% annual vol for interpretable risk.
 - **Automated integrity checks** (`src/strategy.py: quant_checks`) — NaN, date alignment, signal lag, cost timing, no-future-data.
+- **Unit tests** (`pytest`, 8 tests) — mean-reversion sanity, position lagging, bounds, leg decorrelation, Kalman β range, all checks pass.
 - **Subperiod robustness** — performance shown across four regime eras.
+- **Parameter sensitivity** — Sharpe stays in a tight **0.72–0.87** band across the (window, entry) grid → the edge is not cherry-picked.
 
 ![Subperiod robustness](docs/assets/subperiod_robustness.png)
+![Parameter sensitivity](docs/assets/parameter_sensitivity.png)
 ![Drawdown](docs/assets/strategy_drawdown.png)
 
 ## Limitations
@@ -97,7 +100,8 @@ pip install -r requirements.txt
 python -c "from pathlib import Path; from src.data import fetch_from_lseg; fetch_from_lseg(Path('data'))"
 
 python scripts/run_backtest.py        # backtest + metrics + integrity checks
-python scripts/generate_report.py     # figures + tearsheet
+python scripts/generate_report.py     # figures + sensitivity heatmap + tearsheet
+pytest -q                             # run the test suite (8 tests)
 ```
 
 *Built with Python (pandas, numpy, matplotlib). Data: LSEG / Refinitiv continuation futures.*
