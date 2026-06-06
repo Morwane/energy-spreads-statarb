@@ -71,6 +71,23 @@ The two legs are weakly correlated (**ρ ≈ 0.07**) → the combined book genui
 - Brent (ICE) and WTI (NYMEX) roll on slightly different schedules → residual roll noise.
 - **Research only — not investment advice.**
 
+## Robustness (`python scripts/run_robustness.py`)
+
+**Bootstrap** — the combined-book Sharpe 90% CI is **[+0.45, +1.19]**, median +0.83, P(Sharpe > 0) = **100%** (block bootstrap, 2000×, 21-day blocks): a real but modest edge, statistically positive across resamples.
+
+![Bootstrap](docs/assets/robust_bootstrap_sharpe.png)
+
+**Transaction-cost sensitivity** — unlike a slow allocator, a spread stat-arb turns over, so costs bite. Honest picture:
+
+| Cost level | Sharpe | CAGR | Max DD |
+|------------|:------:|:----:|:------:|
+| no cost | +1.03 | +10.4% | −15.5% |
+| 1× base (realistic) | +0.82 | +8.0% | −17.0% |
+| 2× base | +0.60 | +5.7% | −20.1% |
+| 4× base | +0.17 | +1.2% | −27.7% |
+
+The edge survives realistic costs but erodes at several times that — a genuine capacity/cost constraint, stated openly.
+
 ## Repository structure
 
 ```
