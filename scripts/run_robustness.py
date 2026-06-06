@@ -14,6 +14,7 @@ from scipy.stats import gaussian_kde
 from src.data import load_prices
 from src.strategy import build_book
 from src.robustness import block_bootstrap, cost_sensitivity
+from src.metrics import performance, vol_target
 
 ASSETS, REPORTS = REPO / "docs" / "assets", REPO / "reports"
 plt.rcParams.update({"figure.dpi": 140, "savefig.dpi": 140, "axes.grid": True,
@@ -61,6 +62,27 @@ def main():
     print("\n[2] Transaction-cost sensitivity:")
     print(cs.to_string(formatters={"Sharpe": "{:+.2f}".format, "CAGR": "{:+.1%}".format, "MaxDD": "{:.1%}".format}))
 
+    # [3] two mini case studies — each leg on its own
+    legs = [("Crack 3:2:1 (refining margin)", res["r_crack"], res["hl_crack"]),
+            ("Brent-WTI (crude basis)", res["r_bwti"], res["hl_bwti"])]
+    print("\n[3] Per-leg case studies (each spread standalone):")
+    for nm, r, hl in legs:
+        m = performance(vol_target(r))
+        print(f"    {nm:30} Sharpe {m['sharpe']:+.2f} | CAGR {m['cagr']:+.1%} | "
+              f"MaxDD {m['max_dd']:.1%} | OU half-life {hl:.0f}d")
+    print(f"    Leg correlation {res['leg_corr']:+.2f} -> the two are near-independent return sources.")
+
+    fig, ax = plt.subplots(figsize=(10, 4.2))
+    for (nm, r, _), c in zip(legs, ["#27ae60", "#c0392b"]):
+        eq = (1 + vol_target(r)).cumprod()
+        ax.plot(eq.index, (eq - 1) * 100, color=c, lw=1.4,
+                label=f"{nm}  (Sharpe {performance(vol_target(r))['sharpe']:+.2f})")
+    eqb = (1 + vol_target(res["book"])).cumprod()
+    ax.plot(eqb.index, (eqb - 1) * 100, color=BLUE, lw=1.9, label="Combined book")
+    ax.set_title("Two mini case studies - crack vs Brent-WTI (vol-targeted 10%)", fontweight="bold")
+    ax.set_ylabel("cumulative return (%)"); ax.legend(loc="upper left", fontsize=8.5)
+    fig.savefig(ASSETS / "robust_case_studies.png"); plt.close(fig)
+
     plot_bootstrap(sh, dd, "Energy Spreads Stat-Arb - Monte-Carlo robustness (2000 block-bootstrap resamples)",
                    ASSETS / "robust_bootstrap_sharpe.png")
 
@@ -74,7 +96,15 @@ def main():
          "| Cost level | Sharpe | CAGR | Max DD |", "|---|--:|--:|--:|"]
     for lvl, row in cs.iterrows():
         L.append(f"| {lvl} | {row['Sharpe']:+.2f} | {row['CAGR']:+.1%} | {row['MaxDD']:.1%} |")
-    L += ["", "_Base cost ~ a realistic spread-leg charge; the edge survives several times that._"]
+    L += ["", "_Base cost ~ a realistic spread-leg charge; the edge survives several times that._", "",
+          "## Two mini case studies", "",
+          "Each leg trades a distinct economic relationship and stands on its own:", "",
+          "| Spread | Economics | Sharpe | OU half-life |", "|---|---|--:|--:|"]
+    econ = ["refining margin (crude in, products out)", "quality/logistics basis between crude benchmarks"]
+    for (nm, r, hl), e in zip(legs, econ):
+        L.append(f"| {nm} | {e} | {performance(vol_target(r))['sharpe']:+.2f} | {hl:.0f}d |")
+    L += ["", f"Leg correlation **{res['leg_corr']:+.2f}** -> near-independent sources, so the combined "
+          "book diversifies.", "", "![Case studies](docs/assets/robust_case_studies.png)"]
     (REPORTS / "robustness.md").write_text("\n".join(L), encoding="utf-8")
     print(f"\nReport: {REPORTS / 'robustness.md'}")
     print("=" * 66)

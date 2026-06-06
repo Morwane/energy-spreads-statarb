@@ -88,6 +88,15 @@ The two legs are weakly correlated (**ρ ≈ 0.07**) → the combined book genui
 
 The edge survives realistic costs but erodes at several times that — a genuine capacity/cost constraint, stated openly.
 
+**Two mini case studies** — each leg trades a distinct economic relationship and stands on its own; combined, they diversify (leg correlation +0.07):
+
+| Spread | Economics | Sharpe | OU half-life |
+|--------|-----------|:------:|:------------:|
+| Crack 3:2:1 | refining margin (crude in, products out) | +0.45 | 61d |
+| Brent–WTI | quality/logistics basis between crude benchmarks | +0.78 | 39d |
+
+![Case studies](docs/assets/robust_case_studies.png)
+
 ## Repository structure
 
 ```

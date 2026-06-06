@@ -16,3 +16,16 @@
 | 4x base | +0.17 | +1.2% | -27.7% |
 
 _Base cost ~ a realistic spread-leg charge; the edge survives several times that._
+
+## Two mini case studies
+
+Each leg trades a distinct economic relationship and stands on its own:
+
+| Spread | Economics | Sharpe | OU half-life |
+|---|---|--:|--:|
+| Crack 3:2:1 (refining margin) | refining margin (crude in, products out) | +0.45 | 61d |
+| Brent-WTI (crude basis) | quality/logistics basis between crude benchmarks | +0.78 | 39d |
+
+Leg correlation **+0.07** -> near-independent sources, so the combined book diversifies.
+
+![Case studies](docs/assets/robust_case_studies.png)
