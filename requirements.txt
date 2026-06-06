@@ -1,0 +1,4 @@
+pandas>=2.0
+numpy>=1.24
+matplotlib>=3.7
+# lseg-data  # only needed to refresh data via src/data.fetch_from_lseg
