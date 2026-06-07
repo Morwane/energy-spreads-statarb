@@ -62,19 +62,23 @@ def build_book(prices: pd.DataFrame, **kw) -> dict:
     # Crack leg: fixed economic ratio
     r_crack, z_crack, pos_crack = backtest_leg(crack, crack.diff(), **kw)
 
-    # Brent-WTI leg: Kalman dynamic hedge ratio
+    # Brent-WTI leg: Kalman dynamic hedge ratio. We TRADE the z-score of the
+    # hedge-ratio-adjusted spread LEVEL (lco - beta*cl), which mean-reverts slowly;
+    # the Kalman beta is the hedge, not the signal. (Trading the raw innovation -
+    # the daily residual - would be ~1-day mean-reversion / very high turnover.)
     beta, innov = kalman_hedge_ratio(lco, cl)
-    hedged_pnl = lco.diff() - beta.shift(1) * cl.diff()      # beta lagged → no look-ahead
-    r_bwti, z_bwti, pos_bwti = backtest_leg(innov, hedged_pnl, **kw)
+    dyn_spread = (lco - beta.shift(1) * cl).rename("bwti_hedged")   # hedged spread level
+    hedged_pnl = lco.diff() - beta.shift(1) * cl.diff()             # hedged position PnL (beta lagged)
+    r_bwti, z_bwti, pos_bwti = backtest_leg(dyn_spread, hedged_pnl, **kw)
 
     book = pd.concat([r_crack, r_bwti], axis=1).mean(axis=1).rename("book")
     leg_corr = pd.concat([r_crack, r_bwti], axis=1).corr().iloc[0, 1]
 
     return {
-        "crack": crack, "bwti": bwti, "beta": beta,
+        "crack": crack, "bwti": bwti, "bwti_hedged": dyn_spread, "beta": beta,
         "z_crack": z_crack, "z_bwti": z_bwti, "pos_crack": pos_crack, "pos_bwti": pos_bwti,
         "r_crack": r_crack, "r_bwti": r_bwti, "book": book,
-        "hl_crack": ou_half_life(crack), "hl_bwti": ou_half_life(bwti),
+        "hl_crack": ou_half_life(crack), "hl_bwti": ou_half_life(dyn_spread),
         "leg_corr": float(leg_corr),
     }
 
@@ -110,6 +114,12 @@ def quant_checks(prices: pd.DataFrame, res: dict) -> list[tuple[str, bool, str]]
              winsor(res["crack"].diff()).rolling(WINDOW).std())).mean()
     net = res["r_crack"].mean()
     checks.append(("costs_reduce_return", net <= gross + 1e-12, f"net {net:.5f} <= gross {gross:.5f}"))
-    # 5. no future return in features: z uses only past via rolling + signal shifted
-    checks.append(("signal_uses_past_only", True, "rolling z + shift(1) by construction"))
+    # 5. no look-ahead: today's position must match YESTERDAY's z-score sign (regime
+    #    only scales magnitude). If the shift were removed, it would match today's z.
+    intended_lag = (-res["z_crack"] / ENTRY).clip(-1, 1).shift(1)
+    both = pd.concat([res["pos_crack"], intended_lag], axis=1).dropna()
+    active = both[(both.iloc[:, 0].abs() > 1e-9) & (both.iloc[:, 1].abs() > 1e-9)]
+    sign_match = float((np.sign(active.iloc[:, 0]) == np.sign(active.iloc[:, 1])).mean()) if len(active) else 1.0
+    checks.append(("signal_is_lagged", sign_match > 0.98,
+                   f"position matches lagged-z sign on {sign_match:.1%} of active days"))
     return checks

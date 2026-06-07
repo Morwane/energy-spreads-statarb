@@ -3,3 +3,4 @@ numpy>=1.24
 matplotlib>=3.7
 pytest>=7.0
 # lseg-data  # only needed to refresh data via src/data.fetch_from_lseg
+scipy>=1.10

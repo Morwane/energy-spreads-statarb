@@ -3,7 +3,7 @@
 Period: **2010-01-04 → 2026-06-04** (4132 trading days). All returns vol-targeted to 10% annual.
 
 ## Executive summary
-A market-neutral relative-value book combining the 3:2:1 crack spread and the Brent-WTI spread. Combined **Sharpe +0.82**, CAGR +8.0%, max drawdown -17.0%, Calmar +0.47. The two legs are weakly correlated (ρ=+0.07) → genuine diversification.
+A market-neutral relative-value book combining the 3:2:1 crack spread and the Brent-WTI spread. Combined **Sharpe +0.79**, CAGR +7.7%, max drawdown -17.0%, Calmar +0.45. The two legs are weakly correlated (ρ=+0.07) → genuine diversification.
 
 ## Data universe
 - WTI `CLc1`, Brent `LCOc1` ($/bbl); RBOB `RBc1`, Heating Oil `HOc1` ($/gal). LSEG continuation futures, 2010-2026.
@@ -16,7 +16,7 @@ A market-neutral relative-value book combining the 3:2:1 crack spread and the Br
 Continuation series are NOT roll-adjusted, but **spreads are roll-robust**: legs roll on similar schedules so roll jumps largely cancel. Residual jumps are winsorized (0.5%/99.5%).
 
 ## Mean-reversion (OU half-life)
-- Crack: **61 days** | Brent-WTI: **39 days** — finite & short → tradable.
+- Crack: **61 days** | Brent-WTI: **33 days** — finite & short → tradable.
 
 ## Signal & hysteresis
 Rolling 60d z-score; **continuous** sizing position = clip(−z/2, −1, 1). Brent-WTI uses a **Kalman dynamic hedge ratio**; the regime filter cuts exposure to 30% when spread vol exceeds its trailing 90th percentile.
@@ -28,8 +28,8 @@ Rolling 60d z-score; **continuous** sizing position = clip(−z/2, −1, 1). Bre
 | Strategy | Sharpe | CAGR | Vol | Max DD | Calmar | Hit | VaR95 | ES95 |
 |---|--:|--:|--:|--:|--:|--:|--:|--:|
 | Crack 3:2:1 | +0.45 | +4.1% | 10.0% | -21.3% | +0.19 | 50% | 0.90% | 1.51% |
-| Brent-WTI | +0.78 | +7.6% | 10.0% | -20.1% | +0.38 | 48% | 0.72% | 1.36% |
-| Combined book | +0.82 | +8.0% | 10.0% | -17.0% | +0.47 | 51% | 0.84% | 1.40% |
+| Brent-WTI | +0.75 | +7.2% | 10.0% | -20.2% | +0.36 | 48% | 0.75% | 1.36% |
+| Combined book | +0.79 | +7.7% | 10.0% | -17.0% | +0.45 | 51% | 0.85% | 1.40% |
 
 ![Equity](../docs/assets/strategy_equity_curve.png)
 ![Drawdown](../docs/assets/strategy_drawdown.png)
@@ -37,15 +37,15 @@ Rolling 60d z-score; **continuous** sizing position = clip(−z/2, −1, 1). Bre
 ## Robustness — subperiods
 | Period | Sharpe | CAGR | Max DD |
 |---|--:|--:|--:|
-| 2010-2014 | +0.38 | +3.5% | -17.0% |
-| 2015-2019 | +0.87 | +8.8% | -13.2% |
-| 2020-2022 | +0.46 | +4.0% | -15.0% |
-| 2023-2026 | +1.82 | +17.5% | -8.5% |
+| 2010-2014 | +0.36 | +3.3% | -17.0% |
+| 2015-2019 | +0.87 | +8.8% | -13.4% |
+| 2020-2022 | +0.30 | +2.5% | -14.7% |
+| 2023-2026 | +1.86 | +17.8% | -8.3% |
 
 ![Subperiods](../docs/assets/subperiod_robustness.png)
 
 ### Parameter sensitivity
-Combined-book Sharpe across (window, entry) grid ranges **0.72 – 0.87** — a stable surface, so the edge is not cherry-picked to one parameter set.
+Combined-book Sharpe across (window, entry) grid ranges **0.70 – 0.84** — a stable surface, so the edge is not cherry-picked to one parameter set.
 
 ![Sensitivity](../docs/assets/parameter_sensitivity.png)
 

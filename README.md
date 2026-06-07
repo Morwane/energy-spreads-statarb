@@ -18,10 +18,10 @@ It is a disciplined, risk-controlled **statistical-arbitrage** project: mean-rev
 | Strategy | Sharpe | CAGR | Vol | Max DD | Calmar | Hit |
 |----------|:------:|:----:|:---:|:------:|:------:|:---:|
 | Crack 3:2:1 | +0.45 | +4.1% | 10.0% | −21.3% | +0.19 | 50% |
-| Brent–WTI (Kalman) | +0.78 | +7.6% | 10.0% | −20.1% | +0.38 | 48% |
-| **Combined book** | **+0.82** | **+8.0%** | 10.0% | **−17.0%** | **+0.47** | 51% |
+| Brent–WTI (Kalman) | +0.75 | +7.2% | 10.0% | −20.2% | +0.36 | 48% |
+| **Combined book** | **+0.79** | **+7.7%** | 10.0% | **−17.0%** | **+0.45** | 51% |
 
-The two legs are weakly correlated (**ρ ≈ 0.07**) → the combined book genuinely diversifies. OU half-lives: **crack 61d**, **Brent–WTI 39d**.
+The two legs are weakly correlated (**ρ ≈ 0.07**) → the combined book genuinely diversifies. OU half-lives: **crack 61d**, **Brent–WTI 33d**.
 
 ![Performance summary](docs/assets/performance_summary_table.png)
 
@@ -41,7 +41,7 @@ The two legs are weakly correlated (**ρ ≈ 0.07**) → the combined book genui
 
 ![Crack z-score](docs/assets/spread_zscore_trades_crack.png)
 
-**Kalman dynamic hedge ratio** — Brent–WTI uses a time-varying β(t) from a Kalman filter (`Brent = α + β·WTI`); the look-ahead-free innovation is the signal. β dislocates at the April-2020 negative-oil shock and resets near 0.75 — a regime a static 1:1 hedge would miss.
+**Kalman dynamic hedge ratio** — Brent–WTI uses a time-varying β(t) from a Kalman filter (`Brent = α + β·WTI`). We trade the z-score of the **hedge-ratio-adjusted spread level** (`Brent − β·WTI`), which mean-reverts over ~33 days; β is the hedge, not the signal. β dislocates at the April-2020 negative-oil shock and resets near 0.75 — a regime a static 1:1 hedge would miss.
 
 ![Kalman beta](docs/assets/kalman_hedge_ratio.png)
 
@@ -73,7 +73,7 @@ The two legs are weakly correlated (**ρ ≈ 0.07**) → the combined book genui
 
 ## Robustness (`python scripts/run_robustness.py`)
 
-**Bootstrap** — the combined-book Sharpe 90% CI is **[+0.45, +1.19]**, median +0.83, P(Sharpe > 0) = **100%** (block bootstrap, 2000×, 21-day blocks): a real but modest edge, statistically positive across resamples.
+**Bootstrap** — the combined-book Sharpe 90% CI is **[+0.43, +1.17]**, median +0.80, P(Sharpe > 0) = **100%** (block bootstrap, 2000×, 21-day blocks): a real but modest edge, statistically positive across resamples.
 
 ![Bootstrap](docs/assets/robust_bootstrap_sharpe.png)
 
@@ -81,10 +81,10 @@ The two legs are weakly correlated (**ρ ≈ 0.07**) → the combined book genui
 
 | Cost level | Sharpe | CAGR | Max DD |
 |------------|:------:|:----:|:------:|
-| no cost | +1.03 | +10.4% | −15.5% |
-| 1× base (realistic) | +0.82 | +8.0% | −17.0% |
-| 2× base | +0.60 | +5.7% | −20.1% |
-| 4× base | +0.17 | +1.2% | −27.7% |
+| no cost | +1.01 | +10.1% | −15.4% |
+| 1× base (realistic) | +0.79 | +7.7% | −17.0% |
+| 2× base | +0.58 | +5.4% | −20.2% |
+| 4× base | +0.15 | +1.0% | −27.8% |
 
 The edge survives realistic costs but erodes at several times that — a genuine capacity/cost constraint, stated openly.
 
@@ -93,7 +93,7 @@ The edge survives realistic costs but erodes at several times that — a genuine
 | Spread | Economics | Sharpe | OU half-life |
 |--------|-----------|:------:|:------------:|
 | Crack 3:2:1 | refining margin (crude in, products out) | +0.45 | 61d |
-| Brent–WTI | quality/logistics basis between crude benchmarks | +0.78 | 39d |
+| Brent–WTI | quality/logistics basis between crude benchmarks | +0.75 | 33d |
 
 ![Case studies](docs/assets/robust_case_studies.png)
 

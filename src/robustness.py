@@ -15,7 +15,7 @@ def block_bootstrap(ret: pd.Series, n=2000, block=21, seed=0):
     nb = int(np.ceil(len(r) / block))
     sh, dd = np.empty(n), np.empty(n)
     for i in range(n):
-        starts = rng.integers(0, len(r) - block, nb)
+        starts = rng.integers(0, len(r) - block + 1, nb)
         samp = np.concatenate([r[s:s + block] for s in starts])[:len(r)]
         sh[i] = samp.mean() / samp.std() * np.sqrt(TD)
         eq = np.cumprod(1 + samp); dd[i] = (eq / np.maximum.accumulate(eq) - 1).min()
